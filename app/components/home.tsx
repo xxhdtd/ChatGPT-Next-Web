@@ -171,19 +171,14 @@ function Screen() {
 export function useLoadData() {
   const config = useAppConfig();
 
-  const modelProviderMap: Record<string, ModelProvider> = {
-    gemini: ModelProvider.GeminiPro,
-    claude: ModelProvider.Claude,
-  };
-  
-  const defaultModelProvider = ModelProvider.GPT;
-  const modelPrefix = config.modelConfig.model.split("-")[0];
-  
-  const api = new ClientApi(
-    modelProviderMap[modelPrefix] || identifyDefaultClaudeModel(config.modelConfig.model)
-      ? ModelProvider.Claude
-      : defaultModelProvider
-  );
+  var api: ClientApi;
+  if (config.modelConfig.model.startsWith("gemini")) {
+    api = new ClientApi(ModelProvider.GeminiPro);
+  } else if (identifyDefaultClaudeModel(config.modelConfig.model)) {
+    api = new ClientApi(ModelProvider.Claude);
+  } else {
+    api = new ClientApi(ModelProvider.GPT);
+  }
   useEffect(() => {
     (async () => {
       const models = await api.llm.models();
